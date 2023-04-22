@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fragmented</title>
+    
+    <script
+    sandbox="allow-scripts"
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js"></script>
+
+    <script
+      sandbox="allow-scripts"
+      type="text/javascript"
+      src="https://cdn.generative.xyz/ajax/libs/c2/1.0.0/c2.min.js"
+    ></script>
+
+    <script type="text/javascript"></script>
+
+    <script id="snippet-random-code" type="text/javascript">
+      // DO NOT EDIT THIS SECTION
+
+      let seed = window.location.href.split("/").find((t) => t.includes("i0"));
+
+      if (seed == null) {
+        const alphabet = "0123456789abcdefghijklmnopqrstuvwsyz";
+        seed =
+          new URLSearchParams(window.location.search).get("seed") ||
+          Array(64)
+            .fill(0)
+            .map((_) => alphabet[(Math.random() * alphabet.length) | 0])
+            .join("") + "i0";
+      } else {
+        let pattern = "seed=";
+        for (let i = 0; i < seed.length - pattern.length; ++i) {
+          if (seed.substring(i, i + pattern.length) == pattern) {
+            seed = seed.substring(i + pattern.length);
+            break;
+          }
+        }
+      }
+
+      function cyrb128($) {
+        let _ = 1779033703,
+          u = 3144134277,
+          i = 1013904242,
+          l = 2773480762;
+        for (let n = 0, r; n < $.length; n++)
+          (_ = u ^ Math.imul(_ ^ (r = $.charCodeAt(n)), 597399067)),
+            (u = i ^ Math.imul(u ^ r, 2869860233)),
+            (i = l ^ Math.imul(i ^ r, 951274213)),
+            (l = _ ^ Math.imul(l ^ r, 2716044179));
+        return (
+          (_ = Math.imul(i ^ (_ >>> 18), 597399067)),
+          (u = Math.imul(l ^ (u >>> 22), 2869860233)),
+          (i = Math.imul(_ ^ (i >>> 17), 951274213)),
+          (l = Math.imul(u ^ (l >>> 19), 2716044179)),
+          [(_ ^ u ^ i ^ l) >>> 0, (u ^ _) >>> 0, (i ^ _) >>> 0, (l ^ _) >>> 0]
+        );
+      }
+
+      function sfc32($, _, u, i) {
+        return function () {
+          (u >>>= 0), (i >>>= 0);
+          var l = (($ >>>= 0) + (_ >>>= 0)) | 0;
+          return (
+            ($ = _ ^ (_ >>> 9)),
+            (_ = (u + (u << 3)) | 0),
+            (u =
+              ((u = (u << 21) | (u >>> 11)) +
+                (l = (l + (i = (i + 1) | 0)) | 0)) |
+              0),
+            (l >>> 0) / 4294967296
+          );
+        };
+      }
+
+      let mathRand = sfc32(...cyrb128(seed));
+    </script>
+    <style>
+      body {
+        margin: 0px;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    
+    <script type="text/javascript">
+      
+      const rand = mathRand();
+
+      function T1(rand) {
+        // calculate rarity by yourself
+        if (rand > 0.5) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      function T2(rand) {
+        if (rand > 0.1) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      // window.$generativeTraits contain list traits for token
+      // you need to populate a $generativeTraits object in the window object
+      window.$generativeTraits = {
+        T1: T1(rand),
+        T2: T2(rand),
+      };
+      console.log(window.$generativeTraits);
+
+      const container = document.createElement("div");
+      container.innerHTML = "<span>seed: " + seed + "</span><br>";
+      document.body.prepend(container);
+
+
+      let xoff = 0;
+      let num = 10;
+      let ax = [];
+      let ay = [];
+      let diameter = 5;
+      let diameterStep = 3.5;
+      let numSlices = 3;
+      let numPositions = 100;
+      let positions = [];
+      let rectSize = 0;
+      let rectSizeStep = 1;
+      let centerX, centerY;
+      let moveX, moveY;
+      seed = Math.round(mathRand() * 255);
+      let colours = ["#F7A4A4", "#A2D9CE", "#FEBE8C", "#B6E2A1", "#7743DB"];
+      c = colours[Math.round(mathRand() * colours.length)];
+      let colours2 = ["#C1C1E1", "#E1B8B8", "#F6B0B0", "#F2E3B6", "#D9D6A2"];
+      c2 = colours2[Math.round(mathRand() * colours2.length)];
+      let colours3 = ["#FFE4E1", "#ADD8E6", "#98FB98", "#FFA07A", "#FFDAB9"];
+      c3 = colours3[Math.floor(Math.random() * colours3.length)];
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        centerX = width / 2;
+        centerY = height / 2;
+        moveX = 0;
+        moveY = 0;
+        let from = color(
+          map(frameCount % 255, seed, 255, seed, mathRand(10, 250)),
+          255,
+          100
+        );
+        let to = color(
+          map(frameCount + (100 % 255), 0, seed, 0, 255),
+          seed,
+          100
+        );
+
+        setGradient(
+          width / 2 - width / 1.1 / 2,
+          height / 2 - height / 1.1 / 2,
+          width / 1.1,
+          height / 1.1,
+          from,
+          to,
+          1
+        );
+
+        frameRate(15);
+
+        for (var i = 0; i < num; i++) {
+          tx = mathRand(width);
+          ty = mathRand(height);
+          moveX = mathRand(width * tx);
+          moveY = mathRand(width + ty);
+        }
+      }
+
+      function draw() {
+        randomSeed(seed);
+        push();
+        stroke(c3);
+        drawCircle();
+        pop();
+
+        push();
+        let centerX = width / 2;
+        let centerY = height / 2;
+        rectMode(CENTER);
+        stroke(c2);
+        strokeWeight(1);
+        rect(centerX, centerY, rectSize, rectSize * 1.5);
+        pop();
+
+        rectSize -= rectSizeStep;
+
+        for (var i = 0; i < numSlices; i++) {
+          stroke(c);
+          translate(frameCount * ty, frameCount * tx);
+          drawPoints(positions);
+        }
+
+        positions.unshift({ x: windowWidth, y: windowHeight });
+        positions.splice(numPositions, 10);
+      }
+
+      function drawPoints(xs) {
+        for (var i = xs.length - 1; i >= 0; i--) {
+          var positions = xs[i];
+          var x = positions.x;
+          var y = positions.y;
+          var dia = diameter + diameterStep * (numPositions - i);
+
+          var noiseValX = mathRand(x * 0.01, y * 0.1, frameCount * 0.5);
+          var noiseValY = mathRand(x * 0.01, y * 0.1, frameCount * 0.5);
+
+          x += map(noiseValX, 0, 1, -1, 1);
+          y += map(noiseValY, 0, 1, -1, 1);
+
+          x = constrain(x, 0, windowWidth);
+          y = constrain(y, 0, windowHeight);
+
+          var x1 = x + numPositions;
+          var y1 = y + numPositions;
+
+          var tx = width / 2 + rectSize * mathRand(i + dia, i * y1);
+          var ty = height / 2 + rectSize + fract(i + dia, i * x1);
+          var newTx = tx + frameCount + mathRand(tx, ty);
+          var newTy = ty + frameCount + mathRand(ty, tx);
+
+          beginShape(POINTS);
+          if (seed >= 100) {
+            vertex(tx, ty);
+          } else if (seed >= 50) {
+            vertex(tx, ty);
+          } else if (seed >= 20) {
+            vertex(tx, ty);
+          } else {
+            vertex(tx, ty);
+          }
+
+          if (seed >= 100) {
+            vertex(tx, ty);
+          } else if (seed >= 50) {
+            vertex(tx++, ty);
+          } else if (seed >= 20) {
+            vertex(tx, ty);
+          } else {
+            vertex(ty, ty);
+          }
+
+          if (seed >= 100) {
+            vertex(tx, ty);
+          } else if (seed >= 50) {
+            vertex(tx, ty);
+          } else if (seed >= 20) {
+            vertex(tx, ty);
+          } else {
+            vertex(tx, newTx);
+          }
+
+          if (seed >= 100) {
+            vertex(tx, ty);
+          } else if (seed >= 50) {
+            vertex(tx, ty);
+          } else if (seed >= 20) {
+            vertex(tx, ty);
+          } else {
+            vertex(tx, newTy);
+          }
+
+          endShape();
+
+          if (frameCount === 250) {
+            noLoop();
+          }
+        }
+      }
+
+      function setGradient(x, y, w, h, c1, c2, axis) {
+        noFill();
+        if (axis === 1) {
+          for (let i = y; i <= y + h; i++) {
+            let inter = map(i, y, y + h, 0, 1);
+            let c = lerpColor(c1, c2, inter);
+            stroke(c1);
+            line(x, i, x + w, i);
+          }
+        } else if (axis === 2) {
+          for (let i = x; i <= x + w; i++) {
+            let inter = map(i, x, x + w, 0, 1);
+            let c = lerpColor(c1, c2, inter);
+            stroke(c);
+            line(i, y, i, y + h);
+          }
+        }
+      }
+
+      function drawCircle() {
+        for (var i = 0; i < 1; i++) {
+          let x = width / 2;
+          let y = height / 2;
+          if (seed >= 100) {
+            ellipse(x + rectSize, y + rectSize, x / 2, y / 2);
+          } else {
+            rectMode(CENTER);
+            rect(x - rectSize, y - rectSize, -x / 2, -y / 2);
+          }
+        }
+      }
+      
+    </script>
+  </body>
+</html>
+
