@@ -4,11 +4,8 @@
     <meta charset="UTF-8" />
     <title>Fragmented</title>
     
-    <script
-    sandbox="allow-scripts"
-    type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+    
     <script
       sandbox="allow-scripts"
       type="text/javascript"
@@ -94,7 +91,7 @@
   </head>
 
   <body>
-    
+        <canvas id="miCanvas"></canvas>
     <script type="text/javascript">
       
       const rand = mathRand();
@@ -127,10 +124,12 @@
       const container = document.createElement("div");
       container.innerHTML = "<span>seed: " + seed + "</span><br>";
       document.body.prepend(container);
-
+      const canvas = document.getElementById('miCanvas');
+      const ctx = canvas.getContext('2d');
 
       let xoff = 0;
-      let num = 10;
+      let num = 100;
+      let num2 = 200;
       let ax = [];
       let ay = [];
       let diameter = 5;
@@ -140,79 +139,77 @@
       let positions = [];
       let rectSize = 0;
       let rectSizeStep = 1;
-      let centerX, centerY;
-      let moveX, moveY;
-      seed = Math.round(mathRand() * 255);
-      let colours = ["#F7A4A4", "#A2D9CE", "#FEBE8C", "#B6E2A1", "#7743DB"];
-      c = colours[Math.round(mathRand() * colours.length)];
-      let colours2 = ["#C1C1E1", "#E1B8B8", "#F6B0B0", "#F2E3B6", "#D9D6A2"];
-      c2 = colours2[Math.round(mathRand() * colours2.length)];
-      let colours3 = ["#FFE4E1", "#ADD8E6", "#98FB98", "#FFA07A", "#FFDAB9"];
-      c3 = colours3[Math.floor(Math.random() * colours3.length)];
+      let range = 6;
+      let pg;
 
+      seed = Math.round(mathRand() * 255);
+      let colours =  ['#F5D7DC', '#EFD3CB', '#E7CDC2', '#C8B6AF', '#B3A7A2']; // pastel
+      c = colours[Math.round(mathRand() * colours.length)];
+      let colours2 =  ['#FF00FF', '#00FFFF', '#FF69B4', '#00FF00', '#FFFF00']; // flourescentes
+      c2 = colours2[Math.round(mathRand() * colours2.length)];
+      let colours3 = ['#FF5733', '#7B2FBE', '#00BFFF', '#C70039', '#008080']; //exoticos
+      c3 = colours3[Math.floor(Math.random() * colours3.length)];
+      
       function setup() {
-        createCanvas(windowWidth, windowHeight);
-        centerX = width / 2;
-        centerY = height / 2;
-        moveX = 0;
-        moveY = 0;
-        let from = color(
-          map(frameCount % 255, seed, 255, seed, mathRand(10, 250)),
-          255,
-          100
-        );
+       createCanvas(windowWidth, windowHeight);
+      //    
+        ctx.fillRect(10, 10, windowWidth, windowHeight);
+        frameRate(30);
+        pg = createGraphics(windowWidth, windowHeight);
+        
+       let from = color(
+          map(frameCount % 255, seed, 255, seed, mathRand(10, 250)), 255, 100);
+
         let to = color(
-          map(frameCount + (100 % 255), 0, seed, 0, 255),
-          seed,
-          100
-        );
+          map(frameCount + 100 % 255, 0, seed, 0, 255), 255, 100);
 
         setGradient(
-          width / 2 - width / 1.1 / 2,
-          height / 2 - height / 1.1 / 2,
-          width / 1.1,
-          height / 1.1,
+          width / 2 - width / 1.5 / 2,
+          height / 2 - height / 1.5 / 2,
+          width / 1.5,
+          height / 1.5,
           from,
           to,
           1
         );
 
-        frameRate(15);
-
         for (var i = 0; i < num; i++) {
           tx = mathRand(width);
           ty = mathRand(height);
-          moveX = mathRand(width * tx);
-          moveY = mathRand(width + ty);
+        }
+
+         for (let i = 0; i < num2; i++) {
+          ax[i] = width / 2;
+          ay[i] = height / 2;
         }
       }
 
-      function draw() {
+      function draw() {         
+        image(pg, 0, 0);
         randomSeed(seed);
-        push();
-        stroke(c3);
-        drawCircle();
-        pop();
 
         push();
         let centerX = width / 2;
         let centerY = height / 2;
         rectMode(CENTER);
-        stroke(c2);
-        strokeWeight(1);
-        rect(centerX, centerY, rectSize, rectSize * 1.5);
+        pg.fill(c3);
+        pg.stroke(c2);
+        pg.strokeWeight(.1);
+        pg.rect(centerX, centerY, rectSize, rectSize * 1.5);
         pop();
 
         rectSize -= rectSizeStep;
 
         for (var i = 0; i < numSlices; i++) {
-          stroke(c);
+          stroke(c3);
           translate(frameCount * ty, frameCount * tx);
           drawPoints(positions);
         }
 
         positions.unshift({ x: windowWidth, y: windowHeight });
-        positions.splice(numPositions, 10);
+        positions.splice(numPositions, 100);
+       
+
       }
 
       function drawPoints(xs) {
@@ -234,11 +231,10 @@
           var x1 = x + numPositions;
           var y1 = y + numPositions;
 
-          var tx = width / 2 + rectSize * mathRand(i + dia, i * y1);
-          var ty = height / 2 + rectSize + fract(i + dia, i * x1);
-          var newTx = tx + frameCount + mathRand(tx, ty);
-          var newTy = ty + frameCount + mathRand(ty, tx);
-
+          var tx = width / 2 + rectSize * mathRand(i, y1);
+          var ty = height / 2 + rectSize + mathRand(dia+i, x1);
+          
+          
           beginShape(POINTS);
           if (seed >= 100) {
             vertex(tx, ty);
@@ -253,7 +249,7 @@
           if (seed >= 100) {
             vertex(tx, ty);
           } else if (seed >= 50) {
-            vertex(tx++, ty);
+            vertex(tx, ty);
           } else if (seed >= 20) {
             vertex(tx, ty);
           } else {
@@ -267,7 +263,7 @@
           } else if (seed >= 20) {
             vertex(tx, ty);
           } else {
-            vertex(tx, newTx);
+            vertex(tx, ty);
           }
 
           if (seed >= 100) {
@@ -277,37 +273,41 @@
           } else if (seed >= 20) {
             vertex(tx, ty);
           } else {
-            vertex(tx, newTy);
+            vertex(tx, ty);
           }
 
-          endShape();
-
-          if (frameCount === 250) {
+        endShape();
+          
+        if (frameCount === 250) {
             noLoop();
           }
         }
-      }
 
-      function setGradient(x, y, w, h, c1, c2, axis) {
-        noFill();
-        if (axis === 1) {
-          for (let i = y; i <= y + h; i++) {
-            let inter = map(i, y, y + h, 0, 1);
-            let c = lerpColor(c1, c2, inter);
-            stroke(c1);
-            line(x, i, x + w, i);
-          }
-        } else if (axis === 2) {
-          for (let i = x; i <= x + w; i++) {
-            let inter = map(i, x, x + w, 0, 1);
-            let c = lerpColor(c1, c2, inter);
-            stroke(c);
-            line(i, y, i, y + h);
+        for (let i = 1; i < num2; i++) {
+          ax[i - 1] = ax[i];
+          ay[i - 1] = ay[i];
+        }
+
+      ax[num2 - 1] += mathRand(-range, range);
+      ay[num2 - 1] += mathRand(-range, range);
+
+      ax[num2 - tx] = constrain(ax[num2 - 1], 0, width);
+      ay[num2 - ty] = constrain(ay[num2 - 1], 0, height);
+
+       for (let j = 1; j < num2; j++) {
+          let val = j / num2 * 204.0 + 51;
+          stroke(val);
+          if (seed >= 100) {
+            line(ax[j], ay[j], ax[j] - rectSize, ax[j]);
+          } else if (seed >= 50) {
+            line(ax[j - rectSize], ay[j - 2], ax[j], ay[j]);
+          } else if (seed >= 20) {
+            line(ax[j - 2], ay[j - 2], ax[j] - rectSize, ay[j]);
+          } else {
+            line(ax[j - 3], ay[j - 1], ax[j] + rectSize, ay[j]);
           }
         }
-      }
 
-      function drawCircle() {
         for (var i = 0; i < 1; i++) {
           let x = width / 2;
           let y = height / 2;
@@ -319,8 +319,40 @@
           }
         }
       }
+
+     function setGradient(x, y, w, h, q1, q2, axis) {
+  noFill();
+  if (axis === 1) {
+    for (let i = y; i <= y + h; i++) {
+      let inter = map(i, y, y + h, 0, 1);
+      let c = lerpColor(q1, q2, inter);
+      stroke(c);
+      
+      // Generar una curva aleatoria
+      let noiseVal = mathRand(i / 50, seed);
+      let curveY = map(noiseVal, 0, 1, y, y + h);
+      
+      line(x, curveY, x + w, curveY);
+    }
+  } else if (axis === 2) {
+    for (let i = x; i <= x + w; i++) {
+      let inter = map(i, x, x + w, 0, 1);
+      let c = lerpColor(q1, q2, inter);
+      stroke(c);
+      
+      // Generar una curva aleatoria
+      let noiseVal = mathRand(i / 50, seed);
+      let curveY = map(noiseVal, 0, 1, y, y + h);
+      
+      line(curveY, i, curveY + h, i);
+    }
+  }
+}
+
+      
       
     </script>
   </body>
 </html>
+
 
